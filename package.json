@@ -1,0 +1,22 @@
+{
+  "name": "gulp-move-tags",
+  "version": "1.0.0",
+  "description": "Move HTML tabs to another placement",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "gulp",
+    "html",
+    "tags",
+    "move"
+  ],
+  "author": "Sébastien Demanou",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^0.19.0",
+    "event-stream": "^3.3.2",
+    "gulp-util": "^3.0.7"
+  }
+}
