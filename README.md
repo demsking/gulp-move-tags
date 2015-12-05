@@ -73,3 +73,18 @@ After build, get:
 </html>
 
 ```
+
+## Using options
+
+The plugin provide options to inspect and change the DOM before the end of the pipe.
+```js
+var options = {
+    done: function(document) {
+        // a document
+        // inspect and change DOM here
+        
+        return document; // return document to update changes
+    }
+}
+
+```

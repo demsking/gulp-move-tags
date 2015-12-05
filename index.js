@@ -47,7 +47,6 @@ module.exports = function(options) {
     return es.map(function (file, cb) {
         try {
             var document = jsdom(String(file.contents));
-            var window = document.defaultView;
         
             attributes.forEach(function(attribute) {
                 getAllElementsWithAttribute(document, attribute).forEach(function(element) {
@@ -97,20 +96,18 @@ module.exports = function(options) {
             });
             
             if (typeof options.done == 'function') {
-                options.done(document, function(doc) {
-                    if (doc) {
-                        document = doc;
-                    }
-                    
-                    file.contents = new Buffer(getDoctype(document) + document.documentElement.outerHTML);
-                    cb(null, file);
-                })
-            } else {
-                file.contents = new Buffer(getDoctype(document) + document.documentElement.outerHTML);
-                cb(null, file);
+                let doc = options.done(document);
+                
+                if (doc) {
+                    document = doc;
+                }
             }
+            
+            file.contents = new Buffer(getDoctype(document) + document.documentElement.outerHTML);
+            
+            return cb(null, file);
         } catch (err) {
-            throw new gutil.PluginError('gulp-move-tags', err);
+            return cb(new gutil.PluginError('gulp-move-tags', err));
         }
     });
 };

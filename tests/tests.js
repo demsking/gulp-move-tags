@@ -24,11 +24,12 @@ describe('gulp-move-tags', function() {
         
         it('should find and move decorated tags in the file', function(next) {
             var stream = moveTags({
-                done: function(document, done) {
+                done: function(document) {
                     console.log(document.documentElement.outerHTML);
                     
-                    done();
                     next();
+                    
+                    return document;
                 }
             });
             
