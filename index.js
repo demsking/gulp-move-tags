@@ -36,15 +36,21 @@ module.exports = function(options) {
         for (var selector in selector_cmds) {
             try {
                 $('[' + selector + ']').each(function() {
+                    var selector = 'move-after';
                     var selector_target = $(this).attr(selector);
                     
-                    if (selector_target.length) {
-                        var tag = $(this).clone();
+                    if (selector_target) {
+                        var clone = $(this).clone();
                         
-                        if ($(selector_target)[selector_cmds[selector]](tag).length) {
+                        clone.removeAttr(selector);
+                        
+                        var tag = $(selector_target)[selector_cmds[selector]](clone);
+                        
+                        if (tag.length) {
                             $(this).remove();
-                            tag.removeAttr(selector);
                         }
+                        
+                        //console.log(r)
                     }
                 });
             } catch(err) {
