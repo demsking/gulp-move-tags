@@ -13,57 +13,104 @@
 
 var es = require('event-stream')
   , gutil = require('gulp-util')
-  , cheerio = require('cheerio');
+  , jsdom = require("jsdom").jsdom;
 
-var stream = function(buffer) {
-    return es.map(function (file, cb) {
-        try {
-            file.contents = new Buffer( buffer( String(file.contents) ));
-        } catch (err) {
-            return cb(new gutil.PluginError('gulp-move-tags', err));
+var attributes = ['move-before', 'move-to', 'move-after'];
+
+function getDoctype(document) {
+    var node = document.doctype;
+    
+    return  "<!DOCTYPE "
+            + node.name
+            + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
+            + (!node.publicId && node.systemId ? ' SYSTEM' : '') 
+            + (node.systemId ? ' "' + node.systemId + '"' : '')
+            + '>';
+}
+
+function getAllElementsWithAttribute(document, attribute) {
+    var matchingElements = [];
+    var allElements = document.getElementsByTagName('*');
+    
+    for (var i = 0, n = allElements.length; i < n; i++) {
+        if (allElements[i].getAttribute(attribute) !== null) {
+            // Element exists with attribute. Add to array.
+            matchingElements.push(allElements[i]);
         }
-        cb(null, file);
-    });
-};
+    }
+    return matchingElements;
+}
 
-module.exports = function(options) {    
+module.exports = function(options) {
     options = options || {};
     
-    return stream(function(file_contents) {
-        var $ = cheerio.load(file_contents);
-        var selector_cmds = {'move-before': 'before', 'move-to': 'append', 'move-after': 'after'};
+    return es.map(function (file, cb) {
+        try {
+            var document = jsdom(String(file.contents));
+            var window = document.defaultView;
         
-        for (var selector in selector_cmds) {
-            try {
-                $('[' + selector + ']').each(function() {
-                    var selector = 'move-after';
-                    var selector_target = $(this).attr(selector);
+            attributes.forEach(function(attribute) {
+                getAllElementsWithAttribute(document, attribute).forEach(function(element) {
+                    var selector = element.getAttribute(attribute);
+                    var pseudo = '';
+                    var targets = null;
+                    var target = null;
                     
-                    if (selector_target) {
-                        var clone = $(this).clone();
-                        
-                        clone.removeAttr(selector);
-                        
-                        var tag = $(selector_target)[selector_cmds[selector]](clone);
-                        
-                        if (tag.length) {
-                            $(this).remove();
-                        }
-                        
-                        //console.log(r)
+                    // Find pseudo class
+                    var tmp = selector.split(':');
+                    
+                    if (tmp.length == 2) {
+                        selector = tmp[0];
+                        pseudo = tmp[1];
                     }
-                });
-            } catch(err) {
-                throw new gutil.PluginError('gulp-move-tags', err);
+                    
+                    targets = document.querySelectorAll(selector);
+                    
+                    switch (pseudo) {
+                        case 'first-child':
+                            target = targets[0];
+                            break;
+                            
+                        case 'last-child':
+                        default:
+                            target = targets[targets.length - 1];
+                            break;
+                    }
+                    
+                    element.removeAttribute(attribute);
+                    element.parentNode.removeChild(element);
+                    
+                    switch (attribute) {
+                        case 'move-before':
+                            target.parentNode.insertBefore(element, target);
+                            break;
+                            
+                        case 'move-to':
+                            target.innerHTML += element.outerHTML;
+                            break;
+                            
+                        case 'move-after':
+                            target.parentNode.insertBefore(element, target.nextSibling);
+                            break;
+                    }
+                })
+            });
+            
+            if (typeof options.done == 'function') {
+                options.done(document, function(doc) {
+                    if (doc) {
+                        document = doc;
+                    }
+                    
+                    file.contents = new Buffer(getDoctype(document) + document.documentElement.outerHTML);
+                    cb(null, file);
+                })
+            } else {
+                file.contents = new Buffer(getDoctype(document) + document.documentElement.outerHTML);
+                cb(null, file);
             }
+        } catch (err) {
+            throw new gutil.PluginError('gulp-move-tags', err);
         }
-        
-        var output = $.html();
-        
-        if (typeof options.done == 'function') {
-            options.done(output);
-        }
-
-        return output;
     });
 };

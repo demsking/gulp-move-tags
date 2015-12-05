@@ -1,6 +1,6 @@
 {
   "name": "gulp-move-tags",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Move HTML tabs to another placement - Useful for organize automatically generated codes",
   "main": "index.js",
   "scripts": {
@@ -24,9 +24,9 @@
   },
   "homepage": "https://github.com/demsking/gulp-move-tags#readme",
   "dependencies": {
-    "cheerio": "^0.19.0",
     "event-stream": "^3.3.2",
-    "gulp-util": "^3.0.7"
+    "gulp-util": "^3.0.7",
+    "jsdom": "^7.1.1"
   },
   "devDependencies": {
     "assert": "^1.3.0",

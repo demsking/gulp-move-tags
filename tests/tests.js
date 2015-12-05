@@ -4,7 +4,6 @@ var fs = require('fs'),
     gutil = require('gulp-util'),
     mocha = require('mocha'),
     assert = require('assert'),
-    cheerio = require('cheerio'),
     moveTags = require('../');
 
 var file = fs.readFileSync(path.join(__dirname, './src/index.html'));
@@ -23,14 +22,13 @@ describe('gulp-move-tags', function() {
             });
         });
         
-        it('should find and move decorated tags in the file', function(done) {
+        it('should find and move decorated tags in the file', function(next) {
             var stream = moveTags({
-                done: function(contents) {
-                    console.log(contents);
-                    
-                    $ = cheerio.load(contents);
+                done: function(document, done) {
+                    console.log(document.documentElement.outerHTML);
                     
                     done();
+                    next();
                 }
             });
             
