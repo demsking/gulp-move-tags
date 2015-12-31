@@ -1,4 +1,4 @@
-/**
+﻿/**
  * gulp-move-tags
  * Copyright(c) 2015 Sébastien Demanou
  * MIT Licensed
@@ -20,7 +20,11 @@ var attributes = ['move-before', 'move-to', 'move-after'];
 function getDoctype(document) {
     var node = document.doctype;
     
-    return  "<!DOCTYPE "
+    if (!node.name) {
+        return "";
+    }
+    
+    return  '<!DOCTYPE '
             + node.name
             + (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '')
             + (!node.publicId && node.systemId ? ' SYSTEM' : '') 
