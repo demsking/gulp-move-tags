@@ -18,11 +18,11 @@ var es = require('event-stream')
 var attributes = ['move-before', 'move-to', 'move-after'];
 
 function getDoctype(document) {
-    var node = document.doctype;
-    
-    if (!node.name) {
+    if (document.doctype == null) {
         return "";
     }
+    
+    var node = document.doctype;
     
     return  '<!DOCTYPE '
             + node.name

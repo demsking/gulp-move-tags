@@ -1,6 +1,6 @@
 ﻿{
   "name": "gulp-move-tags",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Move HTML tabs to another placement - Useful for organize automatically generated codes",
   "main": "index.js",
   "scripts": {
